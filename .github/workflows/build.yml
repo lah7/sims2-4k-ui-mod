@@ -1,0 +1,38 @@
+name: Build
+
+on: [push]
+
+jobs:
+  build_gui:
+    name: GUI
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        # Repository checked out under $GITHUB_WORKSPACE
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.10'
+          architecture: 'x64'
+
+      - name: Cache Dependencies
+        uses: actions/cache@v2
+        with:
+            path: ~\AppData\Local\pip\Cache
+            key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
+
+      - name: Install Dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Build
+        run: |
+          pyinstaller --noconfirm --name "Sims 2 4K UI Patcher" --onefile --windowed sims2_4k_ui_patcher.py
+
+      - name: Upload
+        uses: actions/upload-artifact@v2
+        with:
+          name: "Sims 2 4K UI Patcher.exe"
+          path: "dist/Sims 2 4K UI Patcher.exe"
